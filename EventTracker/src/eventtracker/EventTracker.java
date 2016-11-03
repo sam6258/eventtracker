@@ -36,9 +36,9 @@ public class EventTracker
         apiKey = br.readLine();
         Scanner scanner = new Scanner(System.in);
         SimpleDateFormat time_formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm");
-        Integer currentEvent;
+        String currentEvent;
         System.out.print("Enter event id: ");
-        currentEvent = scanner.nextInt();
+        currentEvent = scanner.nextLine().toLowerCase();
         Integer testId;
         HttpClient client = new DefaultHttpClient();
         
@@ -63,7 +63,6 @@ public class EventTracker
             }
 
             JSONObject participantObj = new JSONObject(result.toString());
-            System.out.println(participantObj);
             Integer id;
             Boolean userExists = true;
             try 
@@ -86,7 +85,7 @@ public class EventTracker
 
                 for (int i = 0; i < events.length() && okayToAttend; i++)
                 {
-                    if (events.getInt(i) == currentEvent) {
+                    if (events.get(i).equals(currentEvent)) {
                         System.out.println("_id = " + testId + " has already been to event " + currentEvent);
                         //display red light here
                         okayToAttend = false;
@@ -113,7 +112,7 @@ public class EventTracker
                 //display green light here
                 JSONObject postObj = new JSONObject();
                 postObj.put("_id", testId);
-                postObj.put("events", new JSONArray("[" + currentEvent + "]"));
+                postObj.put("events", new JSONArray("[\"" + currentEvent + "\"]"));
                 postObj.put("timestamp", new JSONArray("[\"" + time_formatter.format(System.currentTimeMillis()) + "\"]"));
                 post_participant(postObj);
                 System.out.println(postObj);
