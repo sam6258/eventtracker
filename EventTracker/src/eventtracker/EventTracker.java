@@ -88,12 +88,14 @@ public class EventTracker
                 {
                     if (events.getInt(i) == currentEvent) {
                         System.out.println("_id = " + testId + " has already been to event " + currentEvent);
+                        //display red light here
                         okayToAttend = false;
                     }
                 }
                 if (okayToAttend) {
                     System.out.println("_id = " + testId + " has not been to event " + currentEvent + " yet.");
                     System.out.println("Updating _id = " + testId + " in database");
+                    //display green light here
                     events.put(currentEvent);
                     timestamps.put(time_formatter.format(System.currentTimeMillis()));
                     JSONObject postObj = new JSONObject();
@@ -108,6 +110,7 @@ public class EventTracker
             {
                 System.out.println("_id = " + testId + " does not exist.");
                 System.out.println("_id = " + testId + " added for event number " + currentEvent);
+                //display green light here
                 JSONObject postObj = new JSONObject();
                 postObj.put("_id", testId);
                 postObj.put("events", new JSONArray("[" + currentEvent + "]"));
