@@ -32,17 +32,17 @@ public class EventTracker
 
     public static void main(String[] args) throws IOException, JSONException 
     {
-        BufferedReader br = new BufferedReader(new FileReader("src/eventtracker/apiKey.key"));
+        BufferedReader br = new BufferedReader(new FileReader("apiKey.key"));
         apiKey = br.readLine();
         Scanner scanner = new Scanner(System.in);
         SimpleDateFormat time_formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm");
         String currentEvent;
         System.out.print("Enter event id: ");
         currentEvent = scanner.nextLine().toLowerCase();
-        Integer testId;
+        String testId;
         HttpClient client = new DefaultHttpClient();
         
-        while((testId = scanner.nextInt()) != null) 
+        while((testId = scanner.next()) != null) 
         {
 
 
@@ -63,11 +63,11 @@ public class EventTracker
             }
 
             JSONObject participantObj = new JSONObject(result.toString());
-            Integer id;
+            String id;
             Boolean userExists = true;
             try 
             {
-                id = participantObj.getInt("_id");
+                id = participantObj.getString("_id");
                 userExists = true;
 
             }
@@ -78,7 +78,6 @@ public class EventTracker
             
             if (userExists) 
             {
-                System.out.println("_id = " + testId + " exists.");
                 Boolean okayToAttend = true;
                 JSONArray events = participantObj.getJSONArray("events");
                 JSONArray timestamps = participantObj.getJSONArray("timestamp");
@@ -87,13 +86,13 @@ public class EventTracker
                 {
                     if (events.get(i).equals(currentEvent)) {
                         System.out.println("_id = " + testId + " has already been to event " + currentEvent);
+                        System.out.println(result);
                         //display red light here
                         okayToAttend = false;
                     }
                 }
                 if (okayToAttend) {
                     System.out.println("_id = " + testId + " has not been to event " + currentEvent + " yet.");
-                    System.out.println("Updating _id = " + testId + " in database");
                     //display green light here
                     events.put(currentEvent);
                     timestamps.put(time_formatter.format(System.currentTimeMillis()));
@@ -107,8 +106,8 @@ public class EventTracker
             }
             else 
             {
-                System.out.println("_id = " + testId + " does not exist.");
-                System.out.println("_id = " + testId + " added for event number " + currentEvent);
+                System.out.println("_id = " + testId + " is a new user.");
+                System.out.println("_id = " + testId + " added for event " + currentEvent);
                 //display green light here
                 JSONObject postObj = new JSONObject();
                 postObj.put("_id", testId);
@@ -146,7 +145,5 @@ public class EventTracker
         while ((line = rd.readLine()) != null) {
                 result.append(line);
         }
-
-        System.out.println(result.toString());
     }
 }
