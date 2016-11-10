@@ -1,5 +1,11 @@
 package eventtracker;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -30,8 +36,13 @@ public class EventTracker
     static String dbBaseUrl = "https://api.mlab.com/api/1/databases/hack_psu_events/collections";
     static String apiKey;
 
-    public static void main(String[] args) throws IOException, JSONException 
+    final static GpioController gpio = GpioFactory.getInstance();
+    final static GpioPinDigitalOutput green_led = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_24, "MyLED", PinState.LOW);
+    final static GpioPinDigitalOutput red_led = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "MyLED", PinState.LOW);
+    public static void main(String[] args) throws IOException, JSONException, InterruptedException 
     {
+        green_led.setShutdownOptions(true, PinState.LOW);
+        red_led.setShutdownOptions(true, PinState.LOW);
         BufferedReader br = new BufferedReader(new FileReader("apiKey.key"));
         apiKey = br.readLine();
         Scanner scanner = new Scanner(System.in);
@@ -88,12 +99,14 @@ public class EventTracker
                         System.out.println("_id = " + testId + " has already been to event " + currentEvent);
                         System.out.println(result);
                         //display red light here
+                        turn_on_led(false);
                         okayToAttend = false;
                     }
                 }
                 if (okayToAttend) {
                     System.out.println("_id = " + testId + " has not been to event " + currentEvent + " yet.");
                     //display green light here
+                    turn_on_led(true);
                     events.put(currentEvent);
                     timestamps.put(time_formatter.format(System.currentTimeMillis()));
                     JSONObject postObj = new JSONObject();
@@ -109,6 +122,7 @@ public class EventTracker
                 System.out.println("_id = " + testId + " is a new user.");
                 System.out.println("_id = " + testId + " added for event " + currentEvent);
                 //display green light here
+                turn_on_led(true);
                 JSONObject postObj = new JSONObject();
                 postObj.put("_id", testId);
                 postObj.put("events", new JSONArray("[\"" + currentEvent + "\"]"));
@@ -117,7 +131,20 @@ public class EventTracker
                 System.out.println(postObj);
             }
         }
-        
+        gpio.shutdown();
+    }
+    
+    public static void turn_on_led(Boolean acceptLight) throws InterruptedException {
+        // create gpio controller
+        if (acceptLight == true) 
+        {
+            green_led.pulse(1000, true);
+        }
+        else 
+        {
+            red_led.pulse(1000, true);
+        }
+        // provision gpio pin #01 as an output pin and turn on
         
     }
     
